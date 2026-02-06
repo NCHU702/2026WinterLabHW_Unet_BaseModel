@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import re
 from pyproj import Transformer
 import warnings
 import config
@@ -40,24 +41,7 @@ def get_town_coords():
       "01L490": [23.530321, 120.520569],
       "01L910": [23.570458, 120.520964],
       "01M010": [23.587551, 120.40001],
-      "O1J81": [23.5746, 120.3024],
-      "麥寮": [23.7536, 120.2526],
-      "崙背": [23.7602, 120.3539],
-      "莿桐": [23.7632, 120.5057],
-      "林內": [23.7599, 120.6179],
-      "斗六": [23.7092, 120.5435],
-      "斗南": [23.6763, 120.4792],
-      "虎尾": [23.7082, 120.4339],
-      "土庫": [23.6765, 120.3927],
-      "元長": [23.6483, 120.3130],
-      "褒忠": [23.7011, 120.3111],
-      "東勢": [23.6744, 120.2526],
-      "臺西": [23.7032, 120.1983],
-      "四湖": [23.6391, 120.2263],
-      "口湖": [23.5828, 120.1837],
-      "水林": [23.5755, 120.2458],
-      "北港": [23.5746, 120.3024],
-      "大埤": [23.6455, 120.4300]
+      "O1J81": [23.5746, 120.3024]
     }
 
 def load_cwa_stations(csv_path):
@@ -87,14 +71,22 @@ def main():
 
     # Paths from config
     # Reference metadata from t5 (Morakot)
-    ref_dir = os.path.join(config.OUTPUT_DIR, "t5", "flood")
+    # ref_dir = os.path.join(config.OUTPUT_DIR, "t5", "flood")
+    ref_dir = os.path.join(config.INPUTS_DIR, "t5", "flood")
     metadata_path = os.path.join(ref_dir, "metadata.txt")
-    # Use the first flood CSV as mask reference (assumes process_floods.py ran for t5)
-    t5_ref_csv = os.path.join(ref_dir, "dm1d0000.csv")
     
-    if not os.path.exists(metadata_path) or not os.path.exists(t5_ref_csv):
+    # Dynamically find a reference CSV for mask (avoid hardcoding dm1d0000.csv)
+    t5_ref_csv = None
+    if os.path.exists(ref_dir):
+        # Look for files like dm1d*.csv. Sort ensures we pick 0000 if present, or the first available.
+        candidates = sorted([f for f in os.listdir(ref_dir) if f.endswith('.csv') and 'dm1d' in f])
+        if candidates:
+            print(f"Using extraction mask reference: {candidates[0]}")
+            t5_ref_csv = os.path.join(ref_dir, candidates[0])
+
+    if not os.path.exists(metadata_path) or not t5_ref_csv:
         print(f"ERROR: Reference metadata/mask not found in {ref_dir}.")
-        print("Please run 'process_floods.py' first.")
+        print("Please ensure valid flood data exists in inputs.")
         return
 
     # 1. Load Metadata
@@ -182,6 +174,11 @@ def main():
             if col == 'DataTime': continue
             
             col_str = str(col)
+
+            # Skip columns with Chinese characters (Chinese station names)
+            if re.search(r'[\u4e00-\u9fa5]', col_str):
+                continue
+
             base_name = col_str.split('.')[0].strip()
             
             coords = None
