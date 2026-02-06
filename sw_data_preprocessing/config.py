@@ -6,25 +6,19 @@ import os
 #   sw_data_preprocessing/ (scripts)
 #   inputs/
 #   sw_data_all/ (output)
-#   YL_SW/ (raw flood data) - NOTE: This might be outside the repo or passed in. 
-#   For this setup, we assume YL_SW is at: ../../../YL_SW relative to this, 
-#   BUT the user workspace has it at: C:\資工人生\碩士\雲林縣水位預測\Data\雲林縣淹水模擬結果\YL_SW
-#   outputs\SW is the root of workspace.
 
-# We will try to detect project root
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR) # parent of sw_data_preprocessing
 
-INPUTS_DIR = os.path.join(PROJECT_ROOT, "inputs")
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "sw_data_all")
+INPUTS_DIR = os.path.join(PROJECT_ROOT, 'inputs')
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, 'sw_data_all')
 
 # Raw Flood Data Path - User should configure this if it changes
-# Defaulting to the known path in the workspace or a sibling 'YL_SW'
-RAW_FLOOD_DIR = r"c:\資工人生\碩士\雲林縣水位預測\Data\雲林縣淹水模擬結果\YL_SW"
+RAW_FLOOD_DIR = os.path.join(INPUTS_DIR, 'raw_flood_data')
 
 # Rain Data Inputs
-RAIN_EXCEL_PATH = os.path.join(INPUTS_DIR, "typhoon_hourly_rain_up_to_2023_OK.xlsx")
-STATIONS_CSV_PATH = os.path.join(INPUTS_DIR, "CWA_rain_targets_20251126_2323.csv")
+RAIN_EXCEL_PATH = os.path.join(INPUTS_DIR, 'typhoon_hourly_rain_up_to_2023_OK.xlsx')
+STATIONS_CSV_PATH = os.path.join(INPUTS_DIR, 'CWA_rain_targets_20251126_2323.csv')
 
 # Mapping from Raw Flood Source Folder ID to Target ID (tX)
 FLOOD_FOLDER_MAPPING = {
@@ -39,7 +33,7 @@ ID_TO_NAME_MAPPING = {
     't2': '2004_敏督利',
     't3': '2005_海棠',
     't4': '2008_辛樂克',
-    't5': '2009_莫拉克', # Main reference for metadata usually
+    't5': '2009_莫拉克',
     't6': '2012_蘇拉',
     't7': '2013_蘇力',
     't8': '2015_蘇迪勒',
